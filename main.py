@@ -220,8 +220,8 @@ class Game:
                     if gen_type != 1:
                         print(board)
                     break
-                except BoardShipException:
-                    pass
+                except BoardException as e:
+                    print(e)
 
         board.board_clear()
         return board
@@ -282,4 +282,3 @@ else:
 # print(b)
 # b.shot(Dot(5, 3))
 # print(b)
-
