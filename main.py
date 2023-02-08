@@ -141,7 +141,7 @@ class Player:
         self.board = board
         self.enemy = enemy
 
-    def ask(self):
+    def ask(self, ask_type=None, leght=None):
         raise NotImplementedError()
 
     def move(self):
@@ -155,16 +155,19 @@ class Player:
 
 
 class AI(Player):
-    def ask(self):
+    def ask(self, ask_type=None, lenght=None):
         d = Dot(randint(0, self.size), randint(0, self.size))
         print(f"Ход компьютера: {d.x} {d.y}")
         return d
 
 
 class User(Player):
-    def ask(self):
+    def ask(self, ask_type=None, lenght=None):
         while True:
-            cords = input("Ваш ход: ").split()
+            if ask_type == None:
+                cords = input("Ваш ход: ").split()
+            else:
+                cords = input(f"Укажите начальную точку размещения корабля(размер - {lenght}): ").split()
 
             if len(cords) != 2:
                 print(" Введите 2 координаты! ")
@@ -182,22 +185,23 @@ class User(Player):
 
 
 class Game:
-    def __init__(self, size):
+    def __init__(self, size, gen_type):
         self.size = size
-        pl = self.random_board()
-        co = self.random_board()
+        self.gen_type = gen_type
+        pl = self.random_board(self.gen_type)
+        co = self.random_board(1)
         co.hid = True
 
-        self.ai = AI(co, pl, size-1)
-        self.us = User(pl, co, size-1)
+        self.ai = AI(co, pl, size - 1)
+        self.us = User(pl, co, size - 1)
 
-    def random_board(self):
+    def random_board(self, type):
         board = None
         while board is None:
-            board = self.random_place()
+            board = self.place(type)
         return board
 
-    def random_place(self):
+    def place(self, gen_type):
         lens = [3, 2, 2, 1, 1, 1, 1]
         board = Board(size=self.size)
         attempts = 0
@@ -206,12 +210,19 @@ class Game:
                 attempts += 1
                 if attempts > 2000:
                     return None
-                ship = Ship(Dot(randint(0, self.size), randint(0, self.size)), l, randint(0, 1))
+                if gen_type == 1:
+                    ship = Ship(Dot(randint(0, self.size), randint(0, self.size)), l, randint(0, 1))
+                else:
+                    st_coord = User.ask(self, 1, l)
+                    ship = Ship(st_coord, l, randint(0, 1))
                 try:
                     board.add_ship(ship)
+                    if gen_type != 1:
+                        print(board)
                     break
                 except BoardShipException:
                     pass
+
         board.board_clear()
         return board
 
@@ -252,7 +263,8 @@ class Game:
 
 size = input('Введите размер игрового поля (5-9): ')
 if size.isdigit() and 5 <= int(size) <= 9:
-    g = Game(int(size))
+    auto = int(input('Хотите расставить корабли автоматически? 1 - ДА, 0 - НЕТ: '))
+    g = Game(int(size), auto)
     g.start()
 else:
     print(" Необходимо ввести число от 5 до 9! ")
@@ -270,3 +282,4 @@ else:
 # print(b)
 # b.shot(Dot(5, 3))
 # print(b)
+
