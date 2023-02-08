@@ -136,7 +136,8 @@ class Board:
 
 
 class Player:
-    def __init__(self, board, enemy):
+    def __init__(self, board, enemy, size):
+        self.size = size
         self.board = board
         self.enemy = enemy
 
@@ -155,7 +156,7 @@ class Player:
 
 class AI(Player):
     def ask(self):
-        d = Dot(randint(0, 5), randint(0, 5))
+        d = Dot(randint(0, self.size), randint(0, self.size))
         print(f"Ход компьютера: {d.x} {d.y}")
         return d
 
@@ -181,14 +182,14 @@ class User(Player):
 
 
 class Game:
-    def __init__(self, size=6):
+    def __init__(self, size):
         self.size = size
         pl = self.random_board()
         co = self.random_board()
         co.hid = True
 
-        self.ai = AI(co, pl)
-        self.us = User(pl, co)
+        self.ai = AI(co, pl, size-1)
+        self.us = User(pl, co, size-1)
 
     def random_board(self):
         board = None
